@@ -1,0 +1,47 @@
+#!/bin/bash
+
+user=$1
+
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+  SOURCED=1
+  CALLED=
+else
+  SOURCED=
+  CALLED=1
+fi
+
+if [ "$user" = "" ]; then
+  echo "I need a name:"
+  echo "$0 <my-name>"
+else
+  userfile=~/.git-change-author-user_$user
+
+  if [ ! -f $userfile ]; then
+    echo "Give me your name:"
+    read name
+    echo "Give me your email:"
+    read email
+    echo "name='$name'" > $userfile
+    echo "email='$email'" >> $userfile
+  else
+    . $userfile
+  fi
+
+  GIT_AUTHOR_NAME=$name
+  GIT_COMMITTER_NAME=$name
+  GIT_AUTHOR_EMAIL=$email
+  GIT_COMMITTER_EMAIL=$email
+
+  if [ $SOURCED ]; then
+    export GIT_AUTHOR_NAME GIT_COMMITTER_NAME GIT_AUTHOR_EMAIL GIT_COMMITTER_EMAIL
+  fi
+
+  if [ $CALLED ]; then
+    echo "# Need to source $0 $user:"
+    echo "# Or to exec:"
+    echo "GIT_AUTHOR_NAME='$GIT_AUTHOR_NAME';"
+    echo "GIT_COMMITTER_NAME='$GIT_COMMITTER_NAME';"
+    echo "GIT_AUTHOR_EMAIL='$GIT_AUTHOR_EMAIL';"
+    echo "GIT_COMMITTER_EMAIL='$GIT_COMMITTER_EMAIL';"
+  fi
+fi
